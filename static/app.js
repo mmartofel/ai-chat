@@ -2,6 +2,7 @@
 const messagesDiv = document.getElementById('messages');
 const form = document.getElementById('chat-form');
 const input = document.getElementById('input');
+const submitButton = form.querySelector('button[type="submit"]');
 
 /**
  * Add a message to the chat display
@@ -24,6 +25,15 @@ function addMessage(content, sender, isMarkdown = false) {
 }
 
 /**
+ * Enable or disable input controls
+ * @param {boolean} enabled - Whether to enable the controls
+ */
+function setControlsEnabled(enabled) {
+  input.disabled = !enabled;
+  submitButton.disabled = !enabled;
+}
+
+/**
  * Handle form submission and send message to server
  */
 form.addEventListener('submit', async (event) => {
@@ -34,6 +44,9 @@ form.addEventListener('submit', async (event) => {
 
   addMessage(userMessage, 'user');
   input.value = '';
+  
+  // Disable controls while streaming
+  setControlsEnabled(false);
 
   // Stream response from server
   const eventSource = new EventSource(`/chat?message=${encodeURIComponent(userMessage)}`);
@@ -52,6 +65,7 @@ form.addEventListener('submit', async (event) => {
           errorOccurred = true;
         }
         eventSource.close();
+        setControlsEnabled(true);
       } else if (data.message && data.message.content) {
         // Clear error flag once content starts streaming
         errorOccurred = false;
@@ -69,6 +83,7 @@ form.addEventListener('submit', async (event) => {
         botMessageContent = '';
         botMessageDiv = null;
         eventSource.close();
+        setControlsEnabled(true);
       }
     } catch (e) {
       if (!botMessageContent) {
@@ -76,6 +91,7 @@ form.addEventListener('submit', async (event) => {
         errorOccurred = true;
       }
       eventSource.close();
+      setControlsEnabled(true);
     }
   };
 
@@ -84,5 +100,6 @@ form.addEventListener('submit', async (event) => {
       addMessage('Error: Unable to connect to the server. Please try again later.', 'error');
     }
     eventSource.close();
+    setControlsEnabled(true);
   };
 });
