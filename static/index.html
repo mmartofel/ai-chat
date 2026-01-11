@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script defer src="app.js"></script>
 </head>
 <body>
   <div class="container">
@@ -18,91 +19,14 @@
         <div id="messages" class="chat-box" style="height: 600px; overflow-y: auto; border: 3px solid #ddd; padding: 10px;"></div>
       </div>
       <div class="card-action">
-        <form id="chat-form" style="display: flex; gap: 10px; align-items: flex-end;">
+        <form id="chat-form" style="display: flex; gap: 10px; align-items: center;">
           <div class="input-field" style="flex: 1; margin: 0;">
             <input id="input" type="text" placeholder="Write a message…" aria-label="Message input" />
           </div>
-          <button class="btn waves-effect waves-light" type="submit" style="margin: 0; height: 40px; line-height: 40px;">Send</button>
+          <button class="send-btn" type="submit">Send</button>
         </form>
       </div>
     </div>
   </div>
-  <script>
-    const messagesDiv = document.getElementById('messages');
-    const form = document.getElementById('chat-form');
-    const input = document.getElementById('input');
-
-    // Function to add a message to the chat
-    function addMessage(content, sender, isMarkdown = false) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = sender;
-      if (isMarkdown) {
-        messageDiv.innerHTML = marked.parse(content);
-      } else {
-        messageDiv.textContent = content;
-      }
-      messagesDiv.appendChild(messageDiv);
-      messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to the latest message
-    }
-
-    // Handle form submission
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const userMessage = input.value.trim();
-      if (!userMessage) return;
-
-      addMessage(userMessage, 'user'); // Add user message to the chat
-      input.value = ''; // Clear input field
-
-      // Open a streaming connection to the server
-      const eventSource = new EventSource(`/chat?message=${encodeURIComponent(userMessage)}`);
-      let botMessageContent = ''; // Buffer for the bot message content
-      let botMessageDiv = null; // Track the bot message div
-      let errorOccurred = false; // Track if an error has occurred
-
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data); // Parse the JSON string
-          if (data.error) {
-            // Only show error if we haven't received any bot content yet
-            if (!botMessageContent) {
-              addMessage(`Error: ${data.error}`, 'error'); // Display error messages
-              errorOccurred = true; // Mark that an error has occurred
-            }
-            eventSource.close(); // Close the connection gracefully
-          } else if (data.message && data.message.content) {
-            // Clear the error flag once we start receiving content
-            errorOccurred = false;
-            // Append the bot's response incrementally to the buffer
-            botMessageContent += data.message.content;
-            if (!botMessageDiv) {
-              botMessageDiv = document.createElement('div');
-              botMessageDiv.className = 'bot';
-              messagesDiv.appendChild(botMessageDiv);
-            }
-            botMessageDiv.innerHTML = marked.parse(botMessageContent); // Render markdown dynamically
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Auto-scroll to the latest message
-          } else if (data.done) {
-            botMessageContent = ''; // Reset the buffer
-            botMessageDiv = null; // Reset the bot message div
-            eventSource.close(); // Close the connection gracefully
-          }
-        } catch (e) {
-          if (!botMessageContent) {
-            addMessage('Error: Invalid response from server.', 'error'); // Handle invalid JSON
-            errorOccurred = true; // Mark that an error has occurred
-          }
-          eventSource.close(); // Close the connection gracefully
-        }
-      };
-
-      eventSource.onerror = (event) => {
-        if (!errorOccurred && !botMessageContent) {
-          addMessage('Error: Unable to connect to the server. Please try again later.', 'error'); // Display connection error only if no error has been shown yet
-        }
-        eventSource.close();
-      };
-    });
-  </script>
 </body>
 </html>

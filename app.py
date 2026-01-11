@@ -1,37 +1,15 @@
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi import FastAPI, Query
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 import httpx
-import json
 
 app = FastAPI()
 
-REMOTE_MODEL_URL = "http://localhost:11434/api/chat"  # Replace with the actual URL of the remote model server
-
-class ChatRequest(BaseModel):
-    message: str
-
-@app.post("/chat")
-async def chat(req: ChatRequest):
-    async def stream():
-        try:
-            async with httpx.AsyncClient() as client:
-                async with client.stream("POST", REMOTE_MODEL_URL, json={"message": req.message}) as response:
-                    response.raise_for_status()  # Raise an exception for HTTP errors
-                    async for line in response.aiter_lines():
-                        yield f"data: {line}\n\n"
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=503, detail=f"Remote model server is unreachable: {e}")
-        except httpx.HTTPStatusError as e:
-            # Read the response content before accessing it
-            error_content = await e.response.aread()
-            raise HTTPException(status_code=e.response.status_code, detail=f"Error from remote model server: {error_content.decode('utf-8')}")
-
-    return StreamingResponse(stream(), media_type="text/event-stream")
+REMOTE_MODEL_URL = "http://localhost:11434/api/chat"
 
 @app.get("/chat")
 async def chat_stream(message: str = Query(...)):
+    """Stream responses from the remote model server."""
     async def stream():
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
@@ -56,5 +34,5 @@ async def chat_stream(message: str = Query(...)):
 
     return StreamingResponse(stream(), media_type="text/event-stream")
 
-
+# Mount static files
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

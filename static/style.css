@@ -72,7 +72,7 @@ body {
 form {
   display: flex;
   gap: 10px;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .input-field {
@@ -82,10 +82,12 @@ form {
 
 input {
   width: 100%;
-  padding: 12px;
+  padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 16px;
+  height: 44px;
+  box-sizing: border-box;
 }
 
 input:focus {
@@ -95,20 +97,42 @@ input:focus {
 }
 
 button {
-  padding: 12px 20px;
+  padding: 10px 20px;
   background: #0084ff;
   color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s;
-  height: 48px;
-  line-height: 48px;
+  height: 44px;
   font-size: 16px;
+  white-space: nowrap;
 }
 
 button:hover {
   background: #0056b3;
+}
+
+/* Custom send button */
+.send-btn {
+  padding: 10px 20px !important;
+  background: #0084ff !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: background 0.3s !important;
+  height: 44px !important;
+  line-height: 44px !important;
+  font-size: 16px !important;
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  margin: 0 !important;
+}
+
+.send-btn:hover {
+  background: #0056b3 !important;
 }
 
 /* Styles for markdown-rendered content */
