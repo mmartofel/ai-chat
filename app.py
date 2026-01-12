@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -5,7 +6,11 @@ import httpx
 
 app = FastAPI()
 
-REMOTE_MODEL_URL = "http://localhost:11434/api/chat"
+# Read model server URL from environment variable or use default
+MODEL_SERVER_URL = os.getenv(
+    "MODEL_SERVER_URL",
+    "http://localhost:11434/api/chat"  # default
+)
 
 @app.get("/chat")
 async def chat_stream(message: str = Query(...)):
@@ -13,7 +18,7 @@ async def chat_stream(message: str = Query(...)):
     async def stream():
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
-                async with client.stream("POST", REMOTE_MODEL_URL, json={
+                async with client.stream("POST", MODEL_SERVER_URL, json={
                     "model": "mistral",
                     "messages": [
                         {"role": "system", "content": "You are a helpful assistant."},
