@@ -1,0 +1,13 @@
+FROM quay.io/fedora/python-313-minimal:latest
+
+WORKDIR /app
+
+# RUN microdnf -y install git libpq python3 && microdnf clean all
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements-ui.txt
+
+COPY . .
+
+EXPOSE 8000
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
