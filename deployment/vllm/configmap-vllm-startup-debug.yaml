@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vllm-startup
+data:
+  start.sh: |
+    #!/usr/bin/env bash
+    set -e
+    
+    echo "--------------------------------"
+    echo "-  Starting vLLM with args:    -"
+    echo "--------------------------------"
+    echo ""
+    cat /config/args.txt
+    echo ""
+    echo ""
+    echo "--------------------------------"
+    echo ""
+
+    # Debug mode: keep container running
+    echo "Running in debug mode and keep container running indefinitely..."
+    sleep infinity
