@@ -1,0 +1,7 @@
+resources:
+ - pvc-vllm-hf-cache.yaml
+ - configmap-vllm-args.yaml
+ - configmap-vllm-startup.yaml
+ - deployment-vllm.yaml
+ - service-vllm.yaml
+ - route-vllm.yaml

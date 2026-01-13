@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm
+  template:
+    metadata:
+      labels:
+        app: vllm
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: vllm
+          image: quay.io/mmartofe/ai-chat:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+              memory: "6Gi"
+              cpu: "4"
+            requests:
+              nvidia.com/gpu: "1"
+              memory: "4Gi"
+              cpu: "1"
+          env:
+            - name: HF_HOME
+              value: /cache/huggingface
+            - name: HF_HUB_DISABLE_TELEMETRY
+              value: "1"
+          command:
+            - /bin/bash
+            - /config/start.sh
+          volumeMounts:
+            - name: startup
+              mountPath: /config/start.sh
+              subPath: start.sh
+            - name: args
+              mountPath: /config/args.txt
+              subPath: args.txt
+            - name: hf-cache
+              mountPath: /cache
+          readinessProbe:
+            httpGet:
+              path: /v1/models
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /v1/models
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 20
+      volumes:
+        - name: hf-cache
+          persistentVolumeClaim:
+            claimName: vllm-hf-cache
+        - name: startup
+          configMap:
+            name: vllm-startup
+            defaultMode: 0755
+        - name: args
+          configMap:
+            name: vllm-args
