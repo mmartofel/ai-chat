@@ -3,6 +3,7 @@ from fastapi import FastAPI, Query
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 import httpx
+import logging
 
 app = FastAPI()
 
@@ -12,6 +13,17 @@ MODEL_SERVER_URL = os.getenv(
     "http://localhost:11434/api/chat"  # default
 )
 
+# Read model name from environment variable or use default
+MODEL_NAME = os.getenv(
+    "MODEL_NAME",
+    "mistral"  # default
+)
+
+# Log the configuration
+logger = logging.getLogger("uvicorn.app")
+logger.warning(f"MODEL_NAME = {MODEL_NAME}")
+logger.warning(f"MODEL_SERVER_URL = {MODEL_SERVER_URL}")
+
 @app.get("/chat")
 async def chat_stream(message: str = Query(...)):
     """Stream responses from the remote model server."""
@@ -19,7 +31,7 @@ async def chat_stream(message: str = Query(...)):
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 async with client.stream("POST", MODEL_SERVER_URL, json={
-                    "model": "mistral",
+                    "model": MODEL_NAME,
                     "messages": [
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": message}

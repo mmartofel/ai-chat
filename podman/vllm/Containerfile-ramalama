@@ -1,0 +1,13 @@
+FROM nvidia/cuda:13.1.0-runtime-ubi9
+
+WORKDIR /app
+
+RUN dnf update -y && dnf install -y python3 python3-pip
+
+# CRITICAL: downgrade NumPy in the REAL runtime environment
+RUN python3 -m pip install --no-cache-dir --force-reinstall "numpy<2"
+
+# Install vLLM AFTER NumPy is fixed
+RUN python3 -m pip install --no-cache-dir vllm
+
+EXPOSE 8080

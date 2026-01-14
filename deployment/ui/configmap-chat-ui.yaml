@@ -1,0 +1,7 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: chat-ui
+data:
+  MODEL_NAME: 'granite-3-1-8b-instruct-quantized-w8a8'
+  MODEL_SERVER_URL: 'http://granite.rhaiis.svc.cluster.local:8000/v1/chat/completions'
