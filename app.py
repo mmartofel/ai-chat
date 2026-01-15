@@ -7,22 +7,16 @@ import logging
 
 app = FastAPI()
 
-# Read model server URL from environment variable or use default
-MODEL_SERVER_URL = os.getenv(
-    "MODEL_SERVER_URL",
-    "http://localhost:11434/api/chat"  # default
-)
-
-# Read model name from environment variable or use default
-MODEL_NAME = os.getenv(
-    "MODEL_NAME",
-    "mistral"  # default
-)
+# Read model server parameters from environment variables or use defaults
+MODEL_SERVER_URL = os.getenv("LLM_API_URL", "http://localhost:11434/api/chat")
+MODEL_API_KEY = os.getenv("LLM_API_KEY", "dummy_key")
+MODEL_NAME = os.getenv("LLM_MODEL","mistral")
 
 # Log the configuration
 logger = logging.getLogger("uvicorn.app")
 logger.warning(f"MODEL_NAME = {MODEL_NAME}")
 logger.warning(f"MODEL_SERVER_URL = {MODEL_SERVER_URL}")
+logger.warning(f"MODEL_API_KEY = {MODEL_API_KEY}")
 
 @app.get("/chat")
 async def chat_stream(message: str = Query(...)):
@@ -32,6 +26,8 @@ async def chat_stream(message: str = Query(...)):
             async with httpx.AsyncClient(timeout=30.0) as client:
                 async with client.stream("POST", MODEL_SERVER_URL, json={
                     "model": MODEL_NAME,
+                    "api_key": MODEL_API_KEY,
+                    "stream": True,
                     "messages": [
                         {"role": "system", "content": "You are a helpful assistant."},
                         {"role": "user", "content": message}
