@@ -1,2 +1,2 @@
 
-podman build -t vllm:latest -f Containerfile-vllm .
+podman build -t ai-chat-vllm:latest -f Containerfile-vllm .
