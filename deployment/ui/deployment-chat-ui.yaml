@@ -31,7 +31,6 @@ spec:
                   key: MODEL_SERVER_URL
           resources:
              limits:
-                nvidia.com/gpu: "1"
                 memory: "50Mi"
                 cpu: "0.3"
              requests:
