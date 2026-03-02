@@ -3,7 +3,7 @@ FROM nvidia/cuda:13.1.0-runtime-ubi9
 WORKDIR /app
 
 RUN dnf update -y && dnf install -y python3 python3-pip
-COPY requirements-vllm.txt .
+RUN echo "vllm" > requirements-vllm.txt
 RUN pip install --no-cache-dir -r requirements-vllm.txt
 
 EXPOSE 8080

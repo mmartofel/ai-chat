@@ -15,7 +15,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: vllm
-          image: quay.io/mmartofe/ai-chat:latest
+          image: quay.io/mmartofe/ai-chat-vllm:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
